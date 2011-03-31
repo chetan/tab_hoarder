@@ -1,0 +1,62 @@
+<html>
+    <!-- <script type="text/javascript" charset="utf-8" src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js"></script> -->
+    <script type="text/javascript" charset="utf-8">
+
+        // if (localStorage.saved) {
+        //     //console.log("loading from localStorage!!");
+        //     //console.log(localStorage.saved);
+        //     // return;
+        // }
+
+        var saveInterval = 900000; // 900 sec (15min)
+
+        var sessions;
+        if (localStorage.sessions) {
+            sessions = JSON.parse(localStorage.sessions);
+        }
+        if (typeof(sessions) != "object") {
+            sessions = [];
+        }
+        // sessions = []; // use for restting sessions obj
+
+        function saveAllTabs() {
+
+            chrome.windows.getAll( { populate: true },
+                function(windows) {
+                    var saved = [];
+                    for (var i = windows.length - 1; i >= 0; i--){
+                        var wtabs = windows[i].tabs;
+                        if (wtabs.length == 1 && wtabs[0].url.match("^chrome")) {
+                            continue;
+                        }
+                        var tabs = [];
+                        for (var j = wtabs.length - 1; j >= 0; j--){
+                            var tab = wtabs[j];
+                            var t = { url: tab.url, title: tab.title, favicon: tab.favIconUrl }
+                            tabs.push(t);
+                        };
+                        saved.push(tabs);
+                    };
+
+                    // store as new session
+                    var session = { time: new Date().getTime(), windows: saved };
+                    sessions.unshift(session);
+                    localStorage.sessions = JSON.stringify(sessions);
+
+                    // set again
+                    // setTimeout(saveAllTabs, saveInterval);
+                }
+            );
+        }
+
+        function iconClicked() {
+            chrome.tabs.create({ url: "tabs.html" });
+        }
+
+        // setTimeout(saveAllTabs, 1);
+        chrome.browserAction.onClicked.addListener(iconClicked);
+
+
+
+    </script>
+</html>

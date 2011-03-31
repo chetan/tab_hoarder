@@ -1,0 +1,78 @@
+<html>
+    <script type="text/javascript" charset="utf-8" src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js"></script>
+    <script type="text/javascript" charset="utf-8" src="date_format.js"></script>
+    <style type="text/css" media="screen">
+        ul.tabs {
+            list-style-type: none;
+            padding-left: 0px;
+        }
+        .favicon {
+            width: 20px;
+            float: left;
+        }
+    </style>
+<body>
+
+    <div id="tabs"></div>
+
+    <script type="text/javascript" charset="utf-8">
+
+        function loadSessions() {
+            var sessions;
+            if (localStorage.sessions) {
+                sessions = JSON.parse(localStorage.sessions);
+            }
+            if (typeof(sessions) != "object") {
+                sessions = [];
+            }
+            return sessions;
+        }
+
+        function displaySessions(sessions) {
+            if (!sessions || sessions.length == 0) {
+                return;
+            }
+            var div = $("#tabs");
+
+            for (var i=0; i < sessions.length; i++) {
+                var session = sessions[i];
+                var time = new Date(session.time);
+                div.append("<h2>" + time.format("M j, Y h:i:s a") + "</h2>");
+
+                var html = '<ul class="windows">';
+                for (var j=0; j < session.windows.length; j++) {
+                    var win = session.windows[j];
+
+                    html += "<li>";
+                    html += "<h3> Window " + (j+1) + "</h3>";
+                    html += '<ul class="tabs">';
+
+                    for (var k=0; k < win.length; k++) {
+                        var w = win[k];
+                        html += '<li><span class="favicon">';
+                        if (w.favicon) {
+                            html += '<img src="' + w.favicon + '" height="16" width="16" /> ';
+                        } else {
+                            html += "&nbsp;";
+                        }
+                        html += '</span>';
+                        html += '<a href="' + w.url + '">' + w.title + '</a></li>';
+                    };
+                    html += "</ul>";
+                    html += "</li>";
+
+                };
+                html += "</ul>";
+                div.append(html);
+
+
+            };
+
+        }
+
+        displaySessions(loadSessions());
+
+    </script>
+
+</body>
+</html>
