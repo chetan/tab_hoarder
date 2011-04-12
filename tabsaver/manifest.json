@@ -1,11 +1,11 @@
 {
-	"name": "tabsaver",
-	"version": "1.0",
-	"description": "Auto-save all your open tabs!",
-	"background_page": "background.html",
-	"permissions": ["tabs"],
-	"browser_action": {
-      "default_title": "Tab saver!",
-      "default_icon": "icon.png"
-  }
+    "name": "tabsaver",
+    "version": "1.0",
+    "description": "Auto-save all your open tabs!",
+    "background_page": "background.html",
+    "permissions": ["tabs"],
+    "browser_action": {
+        "default_title": "Tab saver!",
+        "default_icon": "icon.png"
+    }
 }
