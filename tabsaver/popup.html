@@ -24,6 +24,15 @@
             window.close();
         });
 
+        $("#save_win").click(function() {
+            saveCurrentWindow();
+        });
+
+        $("#save_win_close").click(function() {
+            saveCurrentWindow(true);
+            window.close();
+        });
+
     </script>
 </body>
 </html>
