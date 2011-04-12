@@ -1,0 +1,29 @@
+<html>
+<script type="text/javascript" charset="utf-8" src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js"></script>
+<script type="text/javascript" charset="utf-8" src="sessions.js"></script>
+<style type="text/css" media="screen">
+    ul {
+        list-style-type: none;
+        padding-left: 0px;
+        width: 200px;
+    }
+</style>
+<body>
+
+    <ul>
+        <li><a href="#" id="save_win">save window</a></li>
+        <li><a href="#" id="save_win_close">save window &amp; close</a></li>
+        <li>&mdash;</li>
+        <li><a href="#" id="show_tabs">tabsaver!</a></li>
+    </ul>
+
+    <script type="text/javascript" charset="utf-8">
+
+        $("#show_tabs").click(function() {
+            chrome.tabs.create({ url: "tabs.html" });
+            window.close();
+        });
+
+    </script>
+</body>
+</html>

@@ -7,13 +7,7 @@
 
         var sessions = loadSessions();
         // sessions = []; // use for resetting sessions obj
-
-        function iconClicked() {
-            chrome.tabs.create({ url: "tabs.html" });
-        }
-
         // setTimeout(saveAllTabsAsSession, 1);
-        chrome.browserAction.onClicked.addListener(iconClicked);
 
     </script>
 </html>
