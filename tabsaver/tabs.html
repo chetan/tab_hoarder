@@ -29,15 +29,20 @@
         }
 
         function displaySessions() {
+
+            var div = $("#tabs");
+            var html = "<h1>Auto-saved sessions</h1>";
+
             if (!sessions || sessions.length == 0) {
+                html += "<p>none available</p>";
+                div.append(html);
                 return;
             }
-            var div = $("#tabs");
 
             for (var i=0; i < sessions.length; i++) {
                 var session = sessions[i];
                 var time = new Date(session.time);
-                var html = "<h2>" + time.format("M j, Y h:i:s a") + "</h2>";
+                html += "<h2>" + time.format("M j, Y h:i:s a") + "</h2>";
 
                 html += '<a href="#" class="show_session" id="show_session_' + i + '" session="' + i + '">show contents</a>';
                 html += '&nbsp;&nbsp;&nbsp;<input type="button" class="btn_restore_session btn_restore_session_' + i + '" session="' + i + '" value="restore this session" />';
@@ -47,14 +52,10 @@
 
         }
 
-        var sessions = loadSessions();
-        displaySessions();
-
         function displaySession(i) {
 
             var session = sessions[i];
             var anchor = $(".btn_restore_session_" + i);
-            console.log(anchor);
 
             var html = '<ul class="windows" id="session_' + i + '">';
             for (var j=0; j < session.windows.length; j++) {
@@ -132,60 +133,69 @@
             return items;
         }
 
-        $(".check_all").click(function() {
-            var checked_status = this.checked;
-            $(getTabs(this)).each(function() {
-                this.checked = checked_status;
+        function attachEvents() {
+            $(".check_all").live('click', function() {
+                // not used anymore
+                var checked_status = this.checked;
+                $(getTabs(this)).each(function() {
+                    this.checked = checked_status;
+                });
             });
-        });
 
-        $(".btn_open_tabs").click(function() {
-            var urls = [];
-            $(getTabs(this, true)).each(function() {
-                urls.push($(this).attr("url"));
-            });
-            chrome.windows.create({ url: urls });
-        });
-
-        $(".check").click(function() {
-            var tabs = getTabs(this, true);
-            if (tabs.length == $(this).attr("tabs")) {
-                $(".btn_open_tabs_" + $(this).attr("window")).val("open all tabs");
-            } else {
-                $(".btn_open_tabs_" + $(this).attr("window")).val("open selected tabs");
-            }
-        });
-
-        $(".show_session").click(function() {
-            var id = $(this).attr("session");
-            if ($(this).text() == "show contents") {
-                if ($("#session_" + id).length > 0) {
-                    $("#session_" + id).show();
-                } else {
-                    displaySession(id);
-                }
-                $(this).text("hide contents");
-            } else {
-                $("#session_" + id).hide();
-                $(this).text("show contents");
-            }
-        });
-
-        $(".btn_restore_session").click(function() {
-            // restore all windows from this session
-            var num = $(this).attr("session");
-            var sessions = loadSessions();
-            var session = sessions[num];
-            for (var j=0; j < session.windows.length; j++) {
-                var win = session.windows[j];
+            $(".btn_open_tabs").live('click', function() {
+                // open the selected tabs (or all tabs if none selected)
                 var urls = [];
-                for (var k=0; k < win.length; k++) {
-                    var w = win[k];
-                    urls.push(w.url);
-                }
+                $(getTabs(this, true)).each(function() {
+                    urls.push($(this).attr("url"));
+                });
                 chrome.windows.create({ url: urls });
-            }
-        })
+            });
+
+            $(".check").live('click', function() {
+                // update button label
+                var tabs = getTabs(this, true);
+                if (tabs.length == $(this).attr("tabs")) {
+                    $(".btn_open_tabs_" + $(this).attr("window")).val("open all tabs");
+                } else {
+                    $(".btn_open_tabs_" + $(this).attr("window")).val("open selected tabs");
+                }
+            });
+
+            $(".show_session").live('click', function() {
+                // show/hide the session
+                var id = $(this).attr("session");
+                if ($(this).text() == "show contents") {
+                    if ($("#session_" + id).length == 0) {
+                        displaySession(id);
+                    }
+                    $("#session_" + id).show();
+                    $(this).text("hide contents");
+                } else {
+                    $("#session_" + id).hide();
+                    $(this).text("show contents");
+                }
+            });
+
+            $(".btn_restore_session").live('click', function() {
+                // restore all windows from this session
+                var num = $(this).attr("session");
+                var sessions = loadSessions();
+                var session = sessions[num];
+                for (var j=0; j < session.windows.length; j++) {
+                    var win = session.windows[j];
+                    var urls = [];
+                    for (var k=0; k < win.length; k++) {
+                        var w = win[k];
+                        urls.push(w.url);
+                    }
+                    chrome.windows.create({ url: urls });
+                }
+            });
+        }
+
+        var sessions = loadSessions();
+        displaySessions();
+        attachEvents();
 
     </script>
 
