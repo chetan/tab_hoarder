@@ -26,6 +26,28 @@ function saveCurrentWindow(close) {
     window.close();
 }
 
+function deleteWindow(id) {
+    var windows = loadWindows();
+    var new_windows = [];
+    for (var i=0; i < windows.length; i++) {
+        if (id != i) {
+            new_windows.push(windows[i]);
+        }
+    };
+    localStorage.windows = JSON.stringify(new_windows);
+}
+
+function deleteSession(id) {
+    var sessions = loadSessions();
+    var new_sessions = [];
+    for (var i=0; i < sessions.length; i++) {
+        if (id != i) {
+            new_sessions.push(sessions[i]);
+        }
+    };
+    localStorage.autosave_sessions = JSON.stringify(new_sessions);
+}
+
 function loadWindows() {
     var windows;
     if (localStorage.windows) {
