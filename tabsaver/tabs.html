@@ -3,10 +3,47 @@
     <script type="text/javascript" charset="utf-8" src="date_format.js"></script>
     <script type="text/javascript" charset="utf-8" src="sessions.js"></script>
     <style type="text/css" media="screen">
+
+        /* SAVED WINDOWS */
+        div.window {
+            border: 3px solid #858585;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+
+        div.window h2 {
+            margin-top: 0px;
+        }
+
+
+        /* AUTO-SAVED SESSIONS */
+
+        div.session {
+            border: 3px solid #858585;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+
+        div.session h2 {
+            margin-top: 0px;
+        }
+
+        div.session_window {
+            border: 3px dotted #CCCCCC;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+
+        div.session_window h3 {
+            margin-top: 0px;
+        }
+
+
+
         ul.windows {
             /*display: none;*/
         }
-        ul.tabs {
+        ul.tabs, ul.session_tabs {
             list-style-type: none;
             padding-left: 0px;
         }
@@ -44,6 +81,7 @@
                 html += '<div class="window" id="window_' + i + '">';
                 html += "<h2> " + win.name + " - saved @ " + time.format("M j, Y h:i:s a") + "</h2>";
                 html += '<a href="#" class="show_window" id="show_window_' + i + '" window="' + i + '">show contents</a>';
+                html += '&nbsp;&nbsp;&nbsp;<input type="button" class="btn_delete_window btn_delete_window_' + i + '" window="' + i + '" value="delete this window" />';
                 html += '</div>';
             };
 
@@ -86,12 +124,13 @@
                 var win = session.windows[j];
 
                 html += "<li>";
-                html += "<h3> Window " + (j+1) + "</h3>";
 
+                html += '<div class="session_window">';
+                html += "<h3> Window " + (j+1) + "</h3>";
                 html += displayWindow(win, j, i);
+                html += '</div>';
 
                 html += "</li>";
-
             };
             html += "</ul>";
             anchor.after(html);
@@ -248,6 +287,15 @@
         }
 
         function attachWindowEvents() {
+            $(".btn_delete_window").live('click', function() {
+               // delete the selected window from the save list
+               var id = $(this).attr("window");
+               deleteWindow(id);
+               $("#saved_windows").html("");
+               windows = loadWindows();
+               displayWindows();
+            });
+
             $(".show_window").live('click', function() {
                 // show/hide the window
                 var id = $(this).attr("window");
@@ -255,7 +303,7 @@
                 if ($(this).text() == "show contents") {
                     if ($("#"+c).length == 0) {
                         // create it the first time
-                        var anchor = $("#show_window_" + id);
+                        var anchor = $(".btn_delete_window_" + id);
                         var html = '<div class="window_tabs" id="' + c + '">';
                         html += displayWindow(windows[id].tabs, id);
                         html += "</div>";
