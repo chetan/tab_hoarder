@@ -20,17 +20,40 @@
     </style>
 <body>
 
-    <div id="tabs"></div>
+    <div id="saved_windows"></div>
+
+    <div id="autosaved_sessions"></div>
 
     <script type="text/javascript" charset="utf-8">
 
-        function getCheckName(j, k) {
-            return ;
+        function displayWindows() {
+
+            var div = $("#saved_windows");
+            var html = "<h1>Saved Windows</h1>";
+
+            if (!windows || windows.length == 0) {
+                html += "<p>none available</p>";
+                div.append(html);
+                return;
+            }
+
+            for (var i=0; i < windows.length; i++) {
+                var win = windows[i];
+                var time = new Date(win.time);
+
+                html += '<div class="window" id="window_' + i + '">';
+                html += "<h2> " + win.name + " - saved @ " + time.format("M j, Y h:i:s a") + "</h2>";
+                html += '<a href="#" class="show_window" id="show_window_' + i + '" window="' + i + '">show contents</a>';
+                html += '</div>';
+            };
+
+            div.append(html);
+
         }
 
         function displaySessions() {
 
-            var div = $("#tabs");
+            var div = $("#autosaved_sessions");
             var html = "<h1>Auto-saved sessions</h1>";
 
             if (!sessions || sessions.length == 0) {
@@ -42,13 +65,14 @@
             for (var i=0; i < sessions.length; i++) {
                 var session = sessions[i];
                 var time = new Date(session.time);
-                html += "<h2>" + time.format("M j, Y h:i:s a") + "</h2>";
 
+                html += '<div class="session" id="session_' + i + '">';
+                html += "<h2>" + time.format("M j, Y h:i:s a") + "</h2>";
                 html += '<a href="#" class="show_session" id="show_session_' + i + '" session="' + i + '">show contents</a>';
                 html += '&nbsp;&nbsp;&nbsp;<input type="button" class="btn_restore_session btn_restore_session_' + i + '" session="' + i + '" value="restore this session" />';
-                div.append(html);
-
+                html += '</div>';
             };
+            div.append(html);
 
         }
 
@@ -57,60 +81,87 @@
             var session = sessions[i];
             var anchor = $(".btn_restore_session_" + i);
 
-            var html = '<ul class="windows" id="session_' + i + '">';
+            var html = '<ul class="session_tabs" id="session_' + i + '_tabs">';
             for (var j=0; j < session.windows.length; j++) {
                 var win = session.windows[j];
 
                 html += "<li>";
                 html += "<h3> Window " + (j+1) + "</h3>";
 
-                // window toolbar
-                html += '<div class="window_tools">';
-                var win_id = 'window="' + j + '" tabs="' + win.length + '"';
-                // html += '<input type="checkbox" class="check_all" ' + win_id + ' id="check_all_' + j + '" />';
-                // html += '<label for="check_all_' + j + '">select all</label>';
-                html += '<input type="button" class="btn_open_tabs btn_open_tabs_' + j + '" ' + win_id + ' value="open all tabs" />';
-                html += '<br/><br/>';
-                html += '</div>';
+                html += displayWindow(win, j, i);
 
-                html += '<ul class="tabs">';
-
-                for (var k=0; k < win.length; k++) {
-                    var w = win[k];
-                    html += '<li>';
-
-                    var ck = 'c_' + j + '_' + k;
-                    html += '<input class="check" id="' + ck + '" type="checkbox" name="' + ck + '" ' + win_id + ' url="' + w.url + '" />&nbsp;';
-
-                    // show favicon
-                    html += '<span class="favicon">';
-                    if (w.favicon) {
-                        html += '<img src="' + w.favicon + '" height="16" width="16" />';
-                    } else {
-                        html += "&nbsp;";
-                    }
-                    html += '</span>';
-
-                    html += '<a href="' + w.url + '">' + w.title + '</a></li>';
-                };
-                html += "</ul>";
                 html += "</li>";
 
             };
             html += "</ul>";
             anchor.after(html);
 
+        }
 
+        function displayWindow(win, j, session_id) {
+            console.log(win);
+            console.log(j);
+
+            var html = "";
+
+            // window toolbar
+            html += '<div class="window_tools">';
+            var win_id = 'window="' + j + '" tabs="' + win.length + '"';
+            if (session_id) {
+                win_id += 'session="' + session_id + '"';
+            }
+            // html += '<input type="checkbox" class="check_all" ' + win_id + ' id="check_all_' + j + '" />';
+            // html += '<label for="check_all_' + j + '">select all</label>';
+            html += '<input type="button" class="btn_open_tabs btn_open_tabs_' + j + '" ' + win_id + ' value="open all tabs" />';
+            html += '<br/><br/>';
+            html += '</div>';
+
+            html += '<ul class="tabs">';
+
+            for (var k=0; k < win.length; k++) {
+                var w = win[k];
+                html += '<li>';
+
+                var ck = 'c_';
+                if (session_id) {
+                    ck += session_id + '_';
+                }
+                ck += j + '_' + k;
+
+                html += '<input class="check" id="' + ck + '" type="checkbox" name="' + ck + '" ' + win_id + ' url="' + w.url + '" />&nbsp;';
+
+                // show favicon
+                html += '<span class="favicon">';
+                if (w.favicon) {
+                    html += '<img src="' + w.favicon + '" height="16" width="16" />';
+                } else {
+                    html += "&nbsp;";
+                }
+                html += '</span>';
+
+                html += '<a href="' + w.url + '">' + w.title + '</a></li>';
+            };
+            html += "</ul>";
+
+            return html;
         }
 
         // pull tab info from checkboxes based on the given element which contains the session id
         function getTabs(el, checked) {
             var items = [];
+
+            var sess = $(el).attr("session");
             var win = $(el).attr("window");
             var tabs = $(el).attr("tabs");
 
+            var id = "#c_";
+            if (sess) {
+                id += sess + "_";
+            }
+            id += win + "_";
+
             for (var i=0; i < tabs; i++) {
-                items.push($("#c_" + win + "_" + i)[0]);
+                items.push($(id + i)[0]);
             };
 
             if (!checked) {
@@ -133,7 +184,7 @@
             return items;
         }
 
-        function attachEvents() {
+        function attachSessionEvents() {
             $(".check_all").live('click', function() {
                 // not used anymore
                 var checked_status = this.checked;
@@ -164,14 +215,17 @@
             $(".show_session").live('click', function() {
                 // show/hide the session
                 var id = $(this).attr("session");
+                var c = "#session_" + id + "_tabs";
                 if ($(this).text() == "show contents") {
-                    if ($("#session_" + id).length == 0) {
+                    if ($(c).length == 0) {
+                        // create it the first time
                         displaySession(id);
                     }
-                    $("#session_" + id).show();
+                    $(c).show();
                     $(this).text("hide contents");
+
                 } else {
-                    $("#session_" + id).hide();
+                    $(c).hide();
                     $(this).text("show contents");
                 }
             });
@@ -193,9 +247,37 @@
             });
         }
 
+        function attachWindowEvents() {
+            $(".show_window").live('click', function() {
+                // show/hide the window
+                var id = $(this).attr("window");
+                var c = "window_" + id + "_tabs";
+                if ($(this).text() == "show contents") {
+                    if ($("#"+c).length == 0) {
+                        // create it the first time
+                        var anchor = $("#show_window_" + id);
+                        var html = '<div class="window_tabs" id="' + c + '">';
+                        html += displayWindow(windows[id].tabs, id);
+                        html += "</div>";
+                        anchor.after(html);
+                    }
+                    $("#"+c).show();
+                    $(this).text("hide contents");
+
+                } else {
+                    $("#"+c).hide();
+                    $(this).text("show contents");
+                }
+            });
+        }
+
+        var windows = loadWindows();
+        displayWindows();
+        attachWindowEvents();
+
         var sessions = loadSessions();
         displaySessions();
-        attachEvents();
+        attachSessionEvents();
 
     </script>
 
